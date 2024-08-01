@@ -6,7 +6,15 @@
     "declarationMap": true,
     "sourceMap": true,
     "rootDir": "./src",
-    "outDir": "./lib"
+    "outDir": "./lib",
+    "resolveJsonModule": true, // json imports
+    "esModuleInterop": true, // import common modules as ES6 Modules
+    "allowSyntheticDefaultImports": true, // support typesystem compatibility
   },
-  "include": ["src/**/*.ts"]
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }
