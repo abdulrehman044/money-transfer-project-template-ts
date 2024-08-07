@@ -1,8 +1,10 @@
 import { ApplicationFailure, proxyActivities } from "@temporalio/workflow";
 import * as activities from './activities'
+import { QueryDocumentSnapshot } from "@google-cloud/firestore";
+import { User } from "./user_model";
 
 export async function AddPtoWorkflow(): Promise<string> {
-    const { addPtos, notifyUser } = proxyActivities<typeof activities>({
+    const { fetchUsers, addPtos, notifyUser, notifySingleUser } = proxyActivities<typeof activities>({
         retry: {
             initialInterval: '1 second',
             maximumInterval: '1 minute',
@@ -13,22 +15,19 @@ export async function AddPtoWorkflow(): Promise<string> {
     });
 
     // Call the addPtos function
-    let result: string[];
-
     try {
-        result = await addPtos();
+        // Fetch all users
+        let data: User[] = await fetchUsers();
+        for (const user of data) {
+            // Add PTO
+            var uid = await addPtos(user);
+            // Notify users
+            notifySingleUser(uid);
+        }
     } catch (error) {
+        console.log(error);
         throw new ApplicationFailure(`Function failed. Error: ${error}`);
     }
-
-    // Notifying the user that ptos were added for
-    try {
-        await notifyUser(result);
-    } catch (error) {
-        throw new ApplicationFailure(`Function failed. Error: ${error}`);
-    }
-
-    // function 3
 
     return 'Workflow completed';
 }

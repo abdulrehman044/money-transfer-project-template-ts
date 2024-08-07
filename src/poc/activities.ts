@@ -1,58 +1,42 @@
-import { collection, getDocs, getFirestore } from "firebase/firestore";
-import * as admin from 'firebase-admin';
-import { FieldValue } from "@google-cloud/firestore";
+import { firestore } from 'firebase-admin';
+import { FieldValue, QueryDocumentSnapshot } from "@google-cloud/firestore";
+import { User } from "./user_model";
 
-export async function addPtos(): Promise<string[]> {
+export type IncrementFunction = () => void;
 
-    var usersToNotify: string[] = [];
-    var items: any[] = [];
-    var result = await admin.firestore().collection('users').get();
-    items = [...(result.docs), ...(result.docs), ...(result.docs)];
-    console.log(result.docs.length)
-    console.log(items.length);
-
-    var counter = 0;
-
-    for (const element of items) {
-        // try {
-        const docSnapshot = await element.ref.get();
-        if (!docSnapshot.exists) {
-            throw new Error('Document does not exist');
-        }
-
-
-        if (counter == 7) {
-            throw new Error("Test error");
-        }
-
-        const currentData = docSnapshot.data();
-        const currentPto = currentData?.leaves?.pto || 0;
-
+export async function addPtos(user: User): Promise<string> {
+    try {
+        const currentPto = user?.leaves?.pto || 0;
         const newPto = currentPto + 1.5;
-
-        await element.ref.update({
+        await firestore().collection('users').doc(user.uid).update({
             'leaves.pto': newPto
         });
-        counter++;
 
-        console.log(`Added PTO for ${element.data()['email']}`)
-        usersToNotify.push(element.id);
-        // }
-        // catch (e) {
-        //     console.log(e);
-        //     console.log(`Failed to add PTO for ${element.data()['email']} - ${e}`)
-        // }
+        console.log(`Added PTO for ${user.email}`)
+
     }
+    catch (e) {
+        console.log(e);
+        console.log(`Failed to add PTO for ${user.email} - ${e}`)
+        throw Error('Failed');
+    }
+    return user.uid;
+}
 
-    console.log('Added ptos');
-    return usersToNotify;
+export async function fetchUsers(): Promise<User[]> {
+    var items: any[] = [];
+    var result = await firestore().collection('users').get();
+    for (const i of result.docs) {
+        items.push(User.fromJSON(i.data()));
+    }
+    return items;
 }
 
 export async function notifyUser(users: string[]): Promise<string> {
 
     for (const element of users) {
         try {
-            await admin.firestore().collection('users').doc(element).collection('notifications').add({
+            await firestore().collection('users').doc(element).collection('notifications').add({
                 'createdAt': new Date().toISOString(),
                 'notification': '1.5 PTO was added to your quota',
                 'read': false,
@@ -65,5 +49,22 @@ export async function notifyUser(users: string[]): Promise<string> {
     }
 
     console.log('Added notifs');
+    return 'PTO added';
+}
+
+export async function notifySingleUser(user: string): Promise<string> {
+
+    try {
+        await firestore().collection('users').doc(user).collection('notifications').add({
+            'createdAt': new Date().toISOString(),
+            'notification': '1.5 PTO was added to your quota',
+            'read': false,
+        });
+        console.log(`added notif for ${user}`);
+    }
+    catch (e) {
+        console.log(`Failed to add notification for ${user}`)
+    }
+
     return 'PTO added';
 }

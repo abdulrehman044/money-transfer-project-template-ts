@@ -12,7 +12,9 @@ async function run(): Promise<string> {
     const handle = await client.start(AddPtoWorkflow, {
         taskQueue: 'poc',
         workflowId: `Add_PTO_${Date.now()}`,
+        // cronSchedule: '* * * * *',
     });
+
 
     console.log(
         `Started Workflow ${handle.workflowId} with RunID ${handle.firstExecutionRunId}`

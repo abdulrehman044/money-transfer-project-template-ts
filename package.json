@@ -26,7 +26,6 @@
     ]
   },
   "dependencies": {
-    "@google-cloud/firestore": "^7.9.0",
     "@swc/core": "^1.7.3",
     "@temporalio/activity": "^1.8.6",
     "@temporalio/client": "^1.8.6",
@@ -36,7 +35,6 @@
     "@types/node-fetch": "^2.6.11",
     "esbuild": "^0.23.0",
     "fast-crc32c": "^2.0.0",
-    "firebase": "^10.12.4",
     "firebase-admin": "^11.5.0",
     "google-gax": "^4.3.8",
     "mocha": "^10.2.0",
