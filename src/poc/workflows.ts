@@ -22,7 +22,7 @@ export async function AddPtoWorkflow(): Promise<string> {
             // Add PTO
             var uid = await addPtos(user);
             // Notify users
-            notifySingleUser(uid);
+            await notifySingleUser(uid);
         }
     } catch (error) {
         console.log(error);
