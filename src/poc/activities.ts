@@ -2,8 +2,6 @@ import { firestore } from 'firebase-admin';
 import { FieldValue, QueryDocumentSnapshot } from "@google-cloud/firestore";
 import { User } from "./user_model";
 
-export type IncrementFunction = () => void;
-
 export async function addPtos(user: User): Promise<string> {
     try {
         const currentPto = user?.leaves?.pto || 0;
